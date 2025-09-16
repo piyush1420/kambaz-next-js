@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Lab1 from "./Lab1/page";
 export default function Labs() {
   return (
     <div id="wd-labs">
@@ -17,6 +18,21 @@ export default function Labs() {
             Lab 3: JavaScript Fundamentals </Link>
         </li>
       </ul>
+      <div id="wd-personal-info">
+        <h2>Student Information</h2>
+        <li><strong>Name:</strong> Piyush Daga</li>
+        <li><strong>Section:</strong> 05 | CRN: 19730 | Online</li>
+        <li>
+        <Link href="/" id="wd-kambaz-link">
+          Kambaz </Link>
+      </li>
+      <li>
+        <Link href="https://github.com/piyush1420/kambaz-next-js" id="wd-github-link">
+          Github repo </Link>
+      </li>
+      </div>
+      <div className="center-container"> <Lab1/></div>
+      
     </div>
   );
 }

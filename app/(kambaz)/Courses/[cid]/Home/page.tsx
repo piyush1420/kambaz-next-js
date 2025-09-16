@@ -1,5 +1,6 @@
 import Modules from "../Modules/page";
 import CourseStatus from "./Status";
+
 export default function Home() {
   return (
     <div id="wd-home">
@@ -11,6 +12,7 @@ export default function Home() {
           </tr>
         </tbody>
       </table>
+      
     </div>
   );
 }

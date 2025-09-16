@@ -1,6 +1,9 @@
 import Link from "next/link";
+import Lab1 from "./Lab1/page";
+
 export default function TOC() {
   return (
+    <div>
     <ul>
       <li>
         <Link href="/Labs" id="wd-labs-link">
@@ -27,5 +30,9 @@ export default function TOC() {
           Github repo </Link>
       </li>
     </ul>
+    
+    
+
+    </div>
   );
 }
