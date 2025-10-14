@@ -29,7 +29,6 @@ import VariablesAndConstants from "./VariablesAndConstants";
 import VariableTypes from "./VariableTypes";
 import Highlight from "./Highlight";
 import PathParameters from "./PathParameters";
-import AddPathParameters from "./add/[a]/[b]/page";
 import TodoList from "./todos/TodoList";
 import TodoItem from "./todos/TodoItem";
 import Styles from "./Styles";
