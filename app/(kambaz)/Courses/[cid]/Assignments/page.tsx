@@ -1,11 +1,18 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client"
 import Link from "next/link";
 import { ListGroup, ListGroupItem, Button, Form } from "react-bootstrap";
 import { BsGripVertical } from "react-icons/bs";
 import { FaPlus } from "react-icons/fa6";
 import { IoEllipsisVertical, IoChevronDown } from "react-icons/io5";
 import { FaFileAlt, FaCheckCircle } from "react-icons/fa";
+import * as db from "../../../Database"
+import { useParams } from "next/navigation";
 
 export default function Assignments() {
+  const { aid } = useParams();
+  const { cid } = useParams();
+  const amts = db.assignments;
   return (
     <div id="wd-assignments">
       <div className="d-flex justify-content-between align-items-center mb-4">
@@ -44,20 +51,26 @@ export default function Assignments() {
           </div>
           
           <ListGroup className="rounded-0">
-            <ListGroupItem className="wd-assignment-item p-3 ps-1 d-flex align-items-start">
+          {amts
+                  .filter((amt: any) => amt.course === cid)
+                  // .filter((crsAmt: any)) => crsAmt === ._id)
+                  .map((crsAmt: any) => (
+            <ListGroupItem key={crsAmt._id}  className="wd-assignment-item p-3 ps-1 d-flex align-items-start">
               <BsGripVertical className="me-2 fs-3 mt-1" />
               <FaFileAlt className="me-2 mt-1 text-success" />
               <div className="flex-grow-1">
-                <Link href="/Courses/1234/Assignments/123" className="text-decoration-none">
-                  <strong className="text-dark">A1 - ENV + HTML</strong>
+
+                
+                <Link href={`/Courses/${crsAmt?.course}/Assignments/${crsAmt?._id}`} className="text-decoration-none">
+                  <strong className="text-dark">{crsAmt?._id}</strong>
                 </Link>
                 <div className="text-muted small mt-1">
-                  <span className="text-danger">Multiple Modules</span>
+                  <span className="text-danger">{crsAmt?.title}</span>
                   <span className="mx-1">|</span>
-                  <span><strong>Not available until</strong> May 6 at 12:00am</span>
+                  <span><strong>Not available until</strong> {crsAmt?.availableFrom}</span>
                   <span className="mx-1">|</span>
                   <br />
-                  <span><strong>Due</strong> May 20 at 11:59pm</span>
+                  <span><strong>Due</strong> {crsAmt?.dueDate}</span>
                   <span className="mx-1">|</span>
                   <span>100 pts</span>
                 </div>
@@ -66,55 +79,9 @@ export default function Assignments() {
                 <FaCheckCircle className="text-success me-2" />
                 <IoEllipsisVertical className="fs-4" />
               </div>
-            </ListGroupItem>
+            </ListGroupItem>))}
             
-            <ListGroupItem className="wd-assignment-item p-3 ps-1 d-flex align-items-start">
-              <BsGripVertical className="me-2 fs-3 mt-1" />
-              <FaFileAlt className="me-2 mt-1 text-success" />
-              <div className="flex-grow-1">
-                <Link href="/Courses/1234/Assignments/124" className="text-decoration-none">
-                  <strong className="text-dark">A2 - CSS + BOOTSTRAP</strong>
-                </Link>
-                <div className="text-muted small mt-1">
-                  <span className="text-danger">Multiple Modules</span>
-                  <span className="mx-1">|</span>
-                  <span><strong>Not available until</strong> May 13 at 12:00am</span>
-                  <span className="mx-1">|</span>
-                  <br />
-                  <span><strong>Due</strong> May 20 at 11:59pm</span>
-                  <span className="mx-1">|</span>
-                  <span>100 pts</span>
-                </div>
-              </div>
-              <div className="d-flex align-items-center">
-                <FaCheckCircle className="text-success me-2" />
-                <IoEllipsisVertical className="fs-4" />
-              </div>
-            </ListGroupItem>
             
-            <ListGroupItem className="wd-assignment-item p-3 ps-1 d-flex align-items-start">
-              <BsGripVertical className="me-2 fs-3 mt-1" />
-              <FaFileAlt className="me-2 mt-1 text-success" />
-              <div className="flex-grow-1">
-                <Link href="/Courses/1234/Assignments/125" className="text-decoration-none">
-                  <strong className="text-dark">A3 - JAVASCRIPT + REACT</strong>
-                </Link>
-                <div className="text-muted small mt-1">
-                  <span className="text-danger">Multiple Modules</span>
-                  <span className="mx-1">|</span>
-                  <span><strong>Not available until</strong> May 20 at 12:00am</span>
-                  <span className="mx-1">|</span>
-                  <br />
-                  <span><strong>Due</strong> May 27 at 11:59pm</span>
-                  <span className="mx-1">|</span>
-                  <span>100 pts</span>
-                </div>
-              </div>
-              <div className="d-flex align-items-center">
-                <FaCheckCircle className="text-success me-2" />
-                <IoEllipsisVertical className="fs-4" />
-              </div>
-            </ListGroupItem>
           </ListGroup>
         </ListGroupItem>
       </ListGroup>

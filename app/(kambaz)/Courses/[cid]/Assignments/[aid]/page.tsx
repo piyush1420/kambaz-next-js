@@ -1,9 +1,19 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 import { Form, Button, Row, Col, Card, FormGroup } from "react-bootstrap";
+import * as db from "../../../../Database"
+import { useParams } from "next/navigation";
 
 export default function AssignmentEditor() {
+  const{cid, aid} = useParams();
+  const amts = db.assignments;
   return (
-    <div id="wd-assignments-editor" className="container mt-4">
+    <>
+    {amts
+      .filter((amt: any) => amt.course === cid)
+      .filter((amt: any) => amt._id === aid)
+      .map((crsAmt: any)=>(
+    <div key={crsAmt._id} id="wd-assignments-editor" className="container mt-4">
       <Row className="mb-3">
         <Col>
           <FormGroup>
@@ -11,7 +21,7 @@ export default function AssignmentEditor() {
             <Form.Control
               type="text"
               id="wd-name"
-              defaultValue="A1"
+              defaultValue={crsAmt?._id}
               size="lg"
             />
           </FormGroup>
@@ -149,7 +159,8 @@ The Kanbas application should include a link to navigate back to the landing pag
                   <Form.Control
                     type="datetime-local"
                     id="wd-due-date"
-                    defaultValue="2024-05-13T23:59"
+                    defaultValue={crsAmt?.editorDueDate ? `${crsAmt.editorDueDate}T23:59` : ""}  // Changed from value to defaultValue and added time
+
                   />
                 </Form.Group>
               </Col>
@@ -162,8 +173,8 @@ The Kanbas application should include a link to navigate back to the landing pag
                   <Form.Control
                     type="datetime-local"
                     id="wd-available-from"
-                    defaultValue="2024-05-06T00:00"
-                  />
+                    defaultValue={crsAmt?.editorAvailableFrom ? `${crsAmt.editorAvailableFrom}T00:00` : ""}  // Added time format
+                    />
                 </Form.Group>
               </Col>
               <Col md={6}>
@@ -172,7 +183,8 @@ The Kanbas application should include a link to navigate back to the landing pag
                   <Form.Control
                     type="datetime-local"
                     id="wd-available-until"
-                    defaultValue="2024-05-20T23:59"
+                    defaultValue={crsAmt?.editorDueDate ? `${crsAmt.editorDueDate}T23:59` : ""}  // Changed from value to defaultValue and added time
+
                   />
                 </Form.Group>
               </Col>
@@ -188,5 +200,7 @@ The Kanbas application should include a link to navigate back to the landing pag
         <Button variant="danger">Cancel</Button>
       </div>
     </div>
+  ))}
+  </>
   );
 }

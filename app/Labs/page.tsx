@@ -27,7 +27,7 @@ export default function Labs() {
           Kambaz </Link>
       </li>
       <li>
-        <Link href="https://github.com/piyush1420/kambaz-next-js" id="wd-github-link">
+        <Link href="https://github.com/piyush1420/kambaz-next-js/tree/a2" id="wd-github-link">
           Github repo </Link>
       </li>
       </div>

@@ -35,13 +35,7 @@ body   {
   .wd-lesson {
     border-left: 3px solid green !important;
   }
-  
-  
 
-
- /* Add these styles to your existing styles.css file */
-
-/* Assignment specific styles */
 .wd-assignment-item {
     border-left: 3px solid green !important;
     border-top: 1px solid #dee2e6;
@@ -53,24 +47,22 @@ body   {
     background-color: #f8f9fa;
   }
   
-  /* Assignment group header */
+
   .wd-assignment-header {
     border-bottom: 1px solid #dee2e6;
   }
   
-  /* Remove rounded corners for assignments */
+
   #wd-assignments .list-group,
   #wd-assignments .list-group-item {
     border-radius: 0 !important;
   }
   
-  /* Assignment group styling */
   .wd-assignment-group {
     border: 1px solid #dee2e6;
     margin-bottom: 1rem;
   }
-  
-  /* Search input styling */
+
   #wd-search-assignment {
     border-radius: 6px;
     border: 1px solid #ced4da;
@@ -81,8 +73,7 @@ body   {
     outline: 0;
     box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
   }
-  
-  /* Assignment link colors */
+
   #wd-assignments a strong {
     color: #de0a0a;
   }
@@ -105,7 +96,6 @@ body   {
 
 
 
-/* Assignment Editor Styles */
 #wd-assignments-editor {
     max-width: 1200px;
   }
@@ -120,8 +110,7 @@ body   {
     border-radius: 6px;
     background-color: #f8f9fa;
   }
-  
-  /* Assign to tags (like "Everyone") */
+
   .wd-assign-to-container {
     border: 1px solid #ced4da;
     border-radius: 4px;
@@ -155,7 +144,7 @@ body   {
     color: #dc3545;
   }
   
-  /* Form control styling */
+ 
   #wd-assignments-editor .form-control,
   #wd-assignments-editor .form-select {
     border-radius: 4px;
@@ -166,12 +155,10 @@ body   {
     line-height: 1.5;
   }
   
-  /* Checkbox styling */
   #wd-assignments-editor .form-check {
     padding-left: 1.5em;
   }
   
-  /* Button styling matching Canvas */
   #wd-assignments-editor .btn-secondary {
     background-color: #edeeee;
     border-color: #6c757d;

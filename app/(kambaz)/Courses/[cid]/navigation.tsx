@@ -1,9 +1,32 @@
+"use client"
 import Link from "next/link";
-export default function CourseNavigation() {
-  return (
+import { useParams, usePathname } from "next/navigation";
+import { ListGroupItem } from "react-bootstrap";
+import { courses } from "../../Database";
 
+export default function CourseNavigation() {
+  const pathname = usePathname();
+  const { cid } = useParams();
+  const course = courses.find((course) => course._id === cid);
+  
+  const links = ["Home", "Modules", "Piazza", "Zoom", "Assignments", "Quizzes", "Grades", "People"];
+  
+  return (
     <div id="wd-courses-navigation" className="wd list-group fs-5 rounded-0">
-      <Link href="/Courses/1234/Home" id="wd-course-home-link"
+      {links.map((link) => (
+        <ListGroupItem 
+          key={link} 
+          as={Link} 
+          href={`/Courses/${course?._id}/${link === "People" ? "People/Table" : link}`}
+          className="list-group-item text-danger border-0"
+        >
+          {link}
+        </ListGroupItem>
+      ))}
+    </div>
+  );
+}
+  {/* <Link href="/Courses/1234/Home" id="wd-course-home-link"
         className="list-group-item active border-0"> Home </Link>
         <Link href="/Courses/1234/Modules" id="wd-course-modules-link"
         className="list-group-item text-danger border-0"> Modules </Link>
@@ -20,8 +43,11 @@ export default function CourseNavigation() {
       <Link href="/Courses/1234/People/Table" id="wd-course-people-link"
         className="list-group-item text-danger border-0" > People </Link>
 
-</div>
-    // <div id="wd-courses-navigation">
+<Link href="/Courses/1234/People/Table" id="wd-course-people-link"
+        className="list-group-item text-danger border-0" > People </Link> */}
+
+
+           // <div id="wd-courses-navigation">
     //   <Link href="/Courses/1234/Home" id="wd-course-home-link">Home</Link><br/>
     //   <Link href="/Courses/1234/Modules" id="wd-course-modules-link">Modules</Link><br/>
     //   <Link href="/Courses/1234/Piazza" id="wd-course-piazza-link">Piazza</Link><br/>
@@ -31,5 +57,3 @@ export default function CourseNavigation() {
     //   <Link href="/Courses/1234/Grades" id="wd-course-grades-link">Grades</Link><br/>
     //   <Link href="/Courses/1234/People/Table" id="wd-course-people-link">People</Link><br/>
     // </div>
-  );
-}
