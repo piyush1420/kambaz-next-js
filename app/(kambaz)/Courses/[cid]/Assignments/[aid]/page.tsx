@@ -196,9 +196,19 @@ The Kanbas application should include a link to navigate back to the landing pag
       <hr />
 
       <div className="d-flex justify-content-end gap-2 mb-4">
-        <Button variant="secondary">Save</Button>
-        <Button variant="danger">Cancel</Button>
-      </div>
+              <Button 
+                variant="secondary" 
+                href={`/Courses/${crsAmt?.course}/Assignments`}
+              >
+                Save
+              </Button>
+              <Button 
+                variant="danger" 
+                href={`/Courses/${crsAmt?.course}/Assignments`}
+              >
+                Cancel
+              </Button>
+            </div>
     </div>
   ))}
   </>
