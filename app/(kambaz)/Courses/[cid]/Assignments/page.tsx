@@ -6,7 +6,6 @@ import { BsGripVertical } from "react-icons/bs";
 import { FaPlus } from "react-icons/fa6";
 import { IoEllipsisVertical, IoChevronDown } from "react-icons/io5";
 import { FaFileAlt, FaCheckCircle } from "react-icons/fa";
-// removed db import - we will use redux later; but kept present imports minimal
 import * as db from "../../../Database"
 import { useParams } from "next/navigation";
 

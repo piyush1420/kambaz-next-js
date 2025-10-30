@@ -1,3 +1,4 @@
+"use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button, FormControl, ListGroup } from "react-bootstrap";
 import { useSelector, useDispatch } from "react-redux";
