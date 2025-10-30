@@ -13,11 +13,11 @@ import DateStateVariable from './DateStateVariable';
 import ObjectStateVariable from './ObjectStateVariable';
 import ArrayStateVariable from './ArrayStateVariable';
 import ParentStateComponent from './ParentStateComponent';
-import ReduxExamples from './ReduxExamples/page';
+import ReduxExamples from './ReduxExamples';
 
 
 import { Provider } from "react-redux";
-import HelloRedux from './ReduxExamples/HelloRedux/page';
+import HelloRedux from './ReduxExamples/HelloRedux';
 
 export default function Lab4() {
     //subfunction
