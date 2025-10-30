@@ -6,12 +6,14 @@ import { BsGripVertical } from "react-icons/bs";
 import { FaPlus } from "react-icons/fa6";
 import { IoEllipsisVertical, IoChevronDown } from "react-icons/io5";
 import { FaFileAlt, FaCheckCircle } from "react-icons/fa";
+// removed db import - we will use redux later; but kept present imports minimal
 import * as db from "../../../Database"
 import { useParams } from "next/navigation";
 
 export default function Assignments() {
   const { aid } = useParams();
   const { cid } = useParams();
+  // keep using db.assignments for now (we will wire redux actions later if needed)
   const amts = db.assignments;
   return (
     <div id="wd-assignments">
@@ -28,10 +30,17 @@ export default function Assignments() {
             <FaPlus className="me-2" />
             Group
           </Button>
-          <Button variant="danger" size="lg" id="wd-add-assignment">
+
+          {/* Navigate to the "new" assignment editor */}
+          <Link
+            id="wd-add-assignment"
+            href={`/Courses/${cid}/Assignments/new`}
+            className="btn btn-danger btn-lg"
+            aria-current="page"
+          >
             <FaPlus className="me-2" />
             Assignment
-          </Button>
+          </Link>
         </div>
       </div>
       
@@ -53,7 +62,6 @@ export default function Assignments() {
           <ListGroup className="rounded-0">
           {amts
                   .filter((amt: any) => amt.course === cid)
-                  // .filter((crsAmt: any)) => crsAmt === ._id)
                   .map((crsAmt: any) => (
             <ListGroupItem key={crsAmt._id}  className="wd-assignment-item p-3 ps-1 d-flex align-items-start">
               <BsGripVertical className="me-2 fs-3 mt-1" />

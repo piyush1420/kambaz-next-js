@@ -15,7 +15,7 @@ export default function KambazNavigation() {
     { label: "Courses",   path: "/Dashboard", icon: LiaBookSolid },
     { label: "Calendar",  path: "/Calendar",  icon: IoCalendarOutline },
     { label: "Inbox",     path: "/Inbox",     icon: FaInbox },
-    { label: "Labs",      path: "/Labs",             icon: LiaCogSolid },
+    { label: "Labs",      path: "/Labs",      icon: LiaCogSolid },
   ];
 
   return (

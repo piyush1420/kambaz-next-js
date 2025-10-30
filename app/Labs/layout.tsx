@@ -9,9 +9,7 @@ export default function LabsLayout({
   return (
     <div className="container mt-4">
 
-      <div className="mb-4">
-        <TOC />
-      </div>
+      <div className="mb-4"><TOC /></div>
       
 
       <div>
