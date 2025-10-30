@@ -1,18 +1,38 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import CourseNavigation from "./navigation";
 import { useSelector } from "react-redux";
 import { useParams } from "next/navigation";
+import { redirect } from "next/navigation";
 import { FaAlignJustify } from "react-icons/fa";
 
 export default function CoursesLayout({ children }: { children: ReactNode }) {
   const { cid } = useParams();
   const { courses } = useSelector((state: any) => state.coursesReducer);
+  const { currentUser } = useSelector((state: any) => state.accountReducer);
+  const { enrollments } = useSelector((state: any) => state.enrollmentsReducer);
+  
   const course = courses.find((course: any) => course._id === cid);
-
-  // hide nav on small screens by default; always visible on md+
   const [showNav, setShowNav] = useState(false);
+
+  // Check authentication
+  if (!currentUser) {
+    redirect("/Account/Signin");
+  }
+
+  // Check authorization for students
+  if (currentUser.role === "STUDENT") {
+    const isEnrolled = enrollments.some(
+      (e: any) => e.user === currentUser._id && e.course === cid
+    );
+    
+    if (!isEnrolled) {
+      redirect("/Dashboard");
+    }
+  }
+  
+  // Faculty and Admin have access to all courses, so no check needed
 
   return (
     <div id="wd-courses">
@@ -33,5 +53,3 @@ export default function CoursesLayout({ children }: { children: ReactNode }) {
     </div>
   );
 }
-
-// show/hide CourseNavigation on small screens via toggle; always show on md+

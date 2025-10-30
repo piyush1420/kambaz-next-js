@@ -1,8 +1,7 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-
-import { useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { setCurrentUser } from "../reducer";
@@ -16,14 +15,13 @@ import {
 } from "react-bootstrap";
 
 export default function Profile() {
-  const router = useRouter();
   const [profile, setProfile] = useState<any>({});
   const dispatch = useDispatch();
   const { currentUser } = useSelector((state: any) => state.accountReducer);
 
   const fetchProfile = () => {
     if (!currentUser) {
-      router.push("/Account/Signin");
+      redirect("/Account/Signin");
       return;
     }
     setProfile(currentUser);
@@ -31,11 +29,12 @@ export default function Profile() {
 
   const signout = () => {
     dispatch(setCurrentUser(null));
-    router.push("/Account/Signin");
+    redirect("/Account/Signin");
   };
 
   useEffect(() => {
     fetchProfile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

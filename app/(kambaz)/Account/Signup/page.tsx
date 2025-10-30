@@ -1,7 +1,7 @@
-"use client"; 
+"use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 import {
   Container,
   Row,
@@ -12,12 +12,10 @@ import {
 } from "react-bootstrap";
 
 export default function Signup() {
-  const router = useRouter();
-
   // Function to handle form submission
   const handleSignup = (event: React.FormEvent) => {
-    event.preventDefault(); 
-    router.push("/Account/Profile");
+    event.preventDefault();
+    redirect("/Account/Profile");
   };
 
   return (
@@ -27,14 +25,14 @@ export default function Signup() {
           <h1 className="mb-4">Signup</h1>
           <Form onSubmit={handleSignup}>
             <Form.Group className="mb-3" controlId="wd-username">
-              <FormControl placeholder="username" defaultValue={"raptor"} />
+              <FormControl placeholder="username" defaultValue={"john"} />
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="wd-password">
               <FormControl
                 placeholder="password"
                 type="password"
-                defaultValue={"123123123"}
+                defaultValue={"password"}
               />
             </Form.Group>
 

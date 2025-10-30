@@ -1,19 +1,76 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 import { Form, Button, Row, Col, Card, FormGroup } from "react-bootstrap";
-import * as db from "../../../../Database"
-import { useParams } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useSelector, useDispatch } from "react-redux";
+import { useState } from "react";
+import { addAssignment, updateAssignment } from "../reducer";
 
 export default function AssignmentEditor() {
-  const{cid, aid} = useParams();
-  const amts = db.assignments;
+  const { cid, aid } = useParams();
+  const router = useRouter();
+  const dispatch = useDispatch();
+  const searchParams = useSearchParams();
+  
+  // Get assignments from Redux store
+  const assignments = useSelector((state: any) => state.assignmentsReducer.assignments);
+  
+  // Check if we're creating new or editing existing
+  const isNew = aid === "new";
+  
+  // Check if edit mode is enabled (only for edit button clicks or new assignments)
+  const editParam = searchParams.get("edit");
+  const [isEditMode, setIsEditMode] = useState(isNew || editParam === "true");
+  
+  // Find existing assignment if editing
+  const existingAssignment = assignments.find(
+    (a: any) => a._id === aid && a.course === cid
+  );
+  
+  // Initialize form state
+  const [assignment, setAssignment] = useState({
+    _id: isNew ? "" : existingAssignment?._id || "",
+    title: existingAssignment?.title || "New Assignment",
+    course: cid as string,
+    description: existingAssignment?.description || "Assignment Description",
+    points: existingAssignment?.points ,
+    group: existingAssignment?.group || "ASSIGNMENTS",
+    displayGradeAs: existingAssignment?.displayGradeAs || "Percentage",
+    submissionType: existingAssignment?.submissionType || "Online",
+    assignTo: existingAssignment?.assignTo || "Everyone",
+    dueDate: existingAssignment?.dueDate || "",
+    availableFrom: existingAssignment?.availableFrom || "",
+    availableUntil: existingAssignment?.availableUntil || "",
+    editorDueDate: existingAssignment?.editorDueDate || "",
+    editorAvailableFrom: existingAssignment?.editorAvailableFrom || "",
+    editorAvailableUntil: existingAssignment?.editorAvailableUntil || "",
+  });
+
+  // Handle save
+  const handleSave = () => {
+    if (isNew) {
+      // Add new assignment
+      dispatch(addAssignment({
+        ...assignment,
+        title: assignment.title,
+        dueDate: assignment.editorDueDate ? `${assignment.editorDueDate} at 11:59pm` : "",
+        availableFrom: assignment.editorAvailableFrom ? `${assignment.editorAvailableFrom} at 12:00am` : "",
+        availableUntil: assignment.editorAvailableUntil ? `${assignment.editorAvailableUntil} at 11:59pm` : "",
+      }));
+    } else {
+      // Update existing assignment
+      dispatch(updateAssignment({
+        ...assignment,
+        dueDate: assignment.editorDueDate ? `${assignment.editorDueDate} at 11:59pm` : "",
+        availableFrom: assignment.editorAvailableFrom ? `${assignment.editorAvailableFrom} at 12:00am` : "",
+        availableUntil: assignment.editorAvailableUntil ? `${assignment.editorAvailableUntil} at 11:59pm` : "",
+      }));
+    }
+    router.push(`/Courses/${cid}/Assignments`);
+  };
+
   return (
-    <>
-    {amts
-      .filter((amt: any) => amt.course === cid)
-      .filter((amt: any) => amt._id === aid)
-      .map((crsAmt: any)=>(
-    <div key={crsAmt._id} id="wd-assignments-editor" className="container mt-4">
+    <div id="wd-assignments-editor" className="container mt-4">
       <Row className="mb-3">
         <Col>
           <FormGroup>
@@ -21,8 +78,10 @@ export default function AssignmentEditor() {
             <Form.Control
               type="text"
               id="wd-name"
-              defaultValue={crsAmt?._id}
+              value={assignment._id}
+              onChange={(e) => setAssignment({ ...assignment, title: e.target.value })}
               size="lg"
+              disabled={!isEditMode}
             />
           </FormGroup>
         </Col>
@@ -35,17 +94,9 @@ export default function AssignmentEditor() {
               as="textarea"
               id="wd-description"
               rows={8}
-              defaultValue={`The assignment is available online.
-
-Submit a link to the landing page of your Web application running on Netlify.
-
-The landing page should include the following:
-• Your full name and section
-• Links to each of the lab assignments
-• Link to the Kambaz application
-• Links to all relevant source code repositories
-
-The Kanbas application should include a link to navigate back to the landing page.`}
+              value={assignment.description}
+              onChange={(e) => setAssignment({ ...assignment, description: e.target.value })}
+              disabled={!isEditMode}
             />
           </Form.Group>
         </Col>
@@ -59,7 +110,9 @@ The Kanbas application should include a link to navigate back to the landing pag
           <Form.Control
             type="number"
             id="wd-points"
-            defaultValue={100}
+            value={assignment.points}
+            onChange={(e) => setAssignment({ ...assignment, points: parseInt(e.target.value) })}
+            disabled={!isEditMode}
           />
         </Col>
       </Row>
@@ -69,8 +122,13 @@ The Kanbas application should include a link to navigate back to the landing pag
           <Form.Label htmlFor="wd-group">Assignment Group</Form.Label>
         </Col>
         <Col md={9}>
-          <Form.Select id="wd-group" defaultValue="ASSIGNMENTS">
-            <option value="ASSIGNMENTS">Assignment Group</option>
+          <Form.Select 
+            id="wd-group" 
+            value={assignment.group}
+            onChange={(e) => setAssignment({ ...assignment, group: e.target.value })}
+            disabled={!isEditMode}
+          >
+            <option value="ASSIGNMENTS">ASSIGNMENTS</option>
             <option value="QUIZZES">QUIZZES</option>
             <option value="EXAMS">EXAMS</option>
             <option value="PROJECT">PROJECT</option>
@@ -83,7 +141,12 @@ The Kanbas application should include a link to navigate back to the landing pag
           <Form.Label htmlFor="wd-display-grade-as">Display Grade as</Form.Label>
         </Col>
         <Col md={9}>
-          <Form.Select id="wd-display-grade-as" defaultValue="Percentage">
+          <Form.Select 
+            id="wd-display-grade-as" 
+            value={assignment.displayGradeAs}
+            onChange={(e) => setAssignment({ ...assignment, displayGradeAs: e.target.value })}
+            disabled={!isEditMode}
+          >
             <option>Percentage</option>
             <option>Points</option>
           </Form.Select>
@@ -96,7 +159,13 @@ The Kanbas application should include a link to navigate back to the landing pag
         </Col>
         <Col md={9}>
           <Card className="p-3">
-            <Form.Select id="wd-submission-type" className="mb-3" defaultValue="Online">
+            <Form.Select 
+              id="wd-submission-type" 
+              className="mb-3" 
+              value={assignment.submissionType}
+              onChange={(e) => setAssignment({ ...assignment, submissionType: e.target.value })}
+              disabled={!isEditMode}
+            >
               <option>Online</option>
               <option>On Paper</option>
               <option>External Tool</option>
@@ -109,30 +178,35 @@ The Kanbas application should include a link to navigate back to the landing pag
                 id="wd-text-entry"
                 label="Text Entry"
                 className="mb-2"
+                disabled={!isEditMode}
               />
               <Form.Check
                 type="checkbox"
                 id="wd-website-url"
                 label="Website URL"
                 className="mb-2"
-                
+                defaultChecked
+                disabled={!isEditMode}
               />
               <Form.Check
                 type="checkbox"
                 id="wd-media-recordings"
                 label="Media Recordings"
                 className="mb-2"
+                disabled={!isEditMode}
               />
               <Form.Check
                 type="checkbox"
                 id="wd-student-annotation"
                 label="Student Annotation"
                 className="mb-2"
+                disabled={!isEditMode}
               />
               <Form.Check
                 type="checkbox"
                 id="wd-file-upload"
                 label="File Uploads"
+                disabled={!isEditMode}
               />
             </div>
           </Card>
@@ -148,7 +222,7 @@ The Kanbas application should include a link to navigate back to the landing pag
             <Form.Group className="mb-3">
               <Form.Label htmlFor="wd-assign-to">Assign to</Form.Label>
               <div className="wd-assign-to-container">
-                <span className="wd-assign-tag">Everyone <button className="wd-remove-tag">×</button></span>
+                <span className="wd-assign-tag">Everyone <button className="wd-remove-tag" disabled={!isEditMode}>×</button></span>
               </div>
             </Form.Group>
 
@@ -159,8 +233,9 @@ The Kanbas application should include a link to navigate back to the landing pag
                   <Form.Control
                     type="datetime-local"
                     id="wd-due-date"
-                    defaultValue={crsAmt?.editorDueDate ? `${crsAmt.editorDueDate}T23:59` : ""}  // Changed from value to defaultValue and added time
-
+                    value={assignment.editorDueDate ? `${assignment.editorDueDate}T23:59` : ""}
+                    onChange={(e) => setAssignment({ ...assignment, editorDueDate: e.target.value.split('T')[0] })}
+                    disabled={!isEditMode}
                   />
                 </Form.Group>
               </Col>
@@ -173,8 +248,10 @@ The Kanbas application should include a link to navigate back to the landing pag
                   <Form.Control
                     type="datetime-local"
                     id="wd-available-from"
-                    defaultValue={crsAmt?.editorAvailableFrom ? `${crsAmt.editorAvailableFrom}T00:00` : ""}  // Added time format
-                    />
+                    value={assignment.editorAvailableFrom ? `${assignment.editorAvailableFrom}T00:00` : ""}
+                    onChange={(e) => setAssignment({ ...assignment, editorAvailableFrom: e.target.value.split('T')[0] })}
+                    disabled={!isEditMode}
+                  />
                 </Form.Group>
               </Col>
               <Col md={6}>
@@ -183,8 +260,9 @@ The Kanbas application should include a link to navigate back to the landing pag
                   <Form.Control
                     type="datetime-local"
                     id="wd-available-until"
-                    defaultValue={crsAmt?.editorDueDate ? `${crsAmt.editorDueDate}T23:59` : ""}  // Changed from value to defaultValue and added time
-
+                    value={assignment.editorAvailableUntil ? `${assignment.editorAvailableUntil}T23:59` : ""}
+                    onChange={(e) => setAssignment({ ...assignment, editorAvailableUntil: e.target.value.split('T')[0] })}
+                    disabled={!isEditMode}
                   />
                 </Form.Group>
               </Col>
@@ -196,21 +274,38 @@ The Kanbas application should include a link to navigate back to the landing pag
       <hr />
 
       <div className="d-flex justify-content-end gap-2 mb-4">
-              <Button 
-                variant="secondary" 
-                href={`/Courses/${crsAmt?.course}/Assignments`}
-              >
-                Save
-              </Button>
-              <Button 
-                variant="danger" 
-                href={`/Courses/${crsAmt?.course}/Assignments`}
-              >
-                Cancel
-              </Button>
-            </div>
+        {isEditMode ? (
+          <>
+            <Button 
+              variant="secondary" 
+              onClick={handleSave}
+            >
+              Save
+            </Button>
+            <Button 
+              variant="danger" 
+              onClick={() => router.push(`/Courses/${cid}/Assignments`)}
+            >
+              Cancel
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button 
+              variant="primary" 
+              onClick={() => setIsEditMode(true)}
+            >
+              Edit
+            </Button>
+            <Button 
+              variant="secondary" 
+              onClick={() => router.push(`/Courses/${cid}/Assignments`)}
+            >
+              Done
+            </Button>
+          </>
+        )}
+      </div>
     </div>
-  ))}
-  </>
   );
 }

@@ -1,47 +1,45 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 import Link from "next/link";
-import { ListGroup, ListGroupItem, Button, Form } from "react-bootstrap";
+import { ListGroup, ListGroupItem } from "react-bootstrap";
 import { BsGripVertical } from "react-icons/bs";
-import { FaPlus } from "react-icons/fa6";
-import { IoEllipsisVertical, IoChevronDown } from "react-icons/io5";
-import { FaFileAlt, FaCheckCircle } from "react-icons/fa";
-import * as db from "../../../Database"
-import { useParams } from "next/navigation";
+
+import { IoChevronDown } from "react-icons/io5";
+import { FaFileAlt } from "react-icons/fa";
+import { useParams, useRouter } from "next/navigation";
+import { useSelector, useDispatch } from "react-redux";
+import { deleteAssignment } from "./reducer";
+import AssignmentControlButtons from "./AssignmentControlButtons";
+import AssignmentControls from "./AssignmentControls";
+import GroupControlButtons from "./GroupControlButtons";
 
 export default function Assignments() {
-  const { aid } = useParams();
   const { cid } = useParams();
-  // keep using db.assignments for now (we will wire redux actions later if needed)
-  const amts = db.assignments;
+  const router = useRouter();
+  const dispatch = useDispatch();
+  
+  // Get assignments from Redux store
+  const assignments = useSelector((state: any) => state.assignmentsReducer.assignments);
+  
+  // Filter assignments for current course
+  const courseAssignments = assignments.filter((amt: any) => amt.course === cid);
+
+  const handleDeleteAssignment = (assignmentId: string) => {
+    const confirmDelete = window.confirm("Are you sure you want to remove this assignment?");
+    if (confirmDelete) {
+      dispatch(deleteAssignment(assignmentId));
+    }
+  };
+
+  const handleEditAssignment = (assignmentId: string) => {
+    // Navigate with edit parameter to enable edit mode
+    router.push(`/Courses/${cid}/Assignments/${assignmentId}?edit=true`);
+  };
+
   return (
     <div id="wd-assignments">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <Form.Control
-          type="text"
-          placeholder="Search for Assignments"
-          id="wd-search-assignment"
-          className="me-2"
-          style={{ maxWidth: "300px" }}
-        />
-        <div>
-          <Button variant="secondary" size="lg" className="me-2" id="wd-add-assignment-group">
-            <FaPlus className="me-2" />
-            Group
-          </Button>
-
-          {/* Navigate to the "new" assignment editor */}
-          <Link
-            id="wd-add-assignment"
-            href={`/Courses/${cid}/Assignments/new`}
-            className="btn btn-danger btn-lg"
-            aria-current="page"
-          >
-            <FaPlus className="me-2" />
-            Assignment
-          </Link>
-        </div>
-      </div>
+      <AssignmentControls />
+      <br /><br /><br /><br />
       
       <ListGroup className="rounded-0">
         <ListGroupItem className="wd-assignment-group p-0 mb-0 fs-5 border-gray">
@@ -53,42 +51,38 @@ export default function Assignments() {
             </div>
             <div className="d-flex align-items-center">
               <span className="wd-assignment-percentage me-3">40% of Total</span>
-              <FaPlus className="fs-4 me-2" />
-              <IoEllipsisVertical className="fs-4" />
+              <GroupControlButtons />
             </div>
           </div>
           
           <ListGroup className="rounded-0">
-          {amts
-                  .filter((amt: any) => amt.course === cid)
-                  .map((crsAmt: any) => (
-            <ListGroupItem key={crsAmt._id}  className="wd-assignment-item p-3 ps-1 d-flex align-items-start">
-              <BsGripVertical className="me-2 fs-3 mt-1" />
-              <FaFileAlt className="me-2 mt-1 text-success" />
-              <div className="flex-grow-1">
-
-                
-                <Link href={`/Courses/${crsAmt?.course}/Assignments/${crsAmt?._id}`} className="text-decoration-none">
-                  <strong className="text-dark">{crsAmt?._id}</strong>
-                </Link>
-                <div className="text-muted small mt-1">
-                  <span className="text-danger">{crsAmt?.title}</span>
-                  <span className="mx-1">|</span>
-                  <span><strong>Not available until</strong> {crsAmt?.availableFrom}</span>
-                  <span className="mx-1">|</span>
-                  <br />
-                  <span><strong>Due</strong> {crsAmt?.dueDate}</span>
-                  <span className="mx-1">|</span>
-                  <span>100 pts</span>
+            {courseAssignments.map((crsAmt: any) => (
+              <ListGroupItem key={crsAmt._id} className="wd-assignment-item p-3 ps-1 d-flex align-items-start">
+                <BsGripVertical className="me-2 fs-3 mt-1" />
+                <FaFileAlt className="me-2 mt-1 text-success" />
+                <div className="flex-grow-1">
+                  {/* Link for viewing assignment in read-only mode */}
+                  <Link href={`/Courses/${crsAmt?.course}/Assignments/${crsAmt?._id}`} className="text-decoration-none">
+                    <strong className="text-dark">{crsAmt?._id || crsAmt?._id}</strong>
+                  </Link>
+                  <div className="text-muted small mt-1">
+                    <span className="text-danger">Multiple Modules</span>
+                    <span className="mx-1">|</span>
+                    <span><strong>Not available until</strong> {crsAmt?.availableFrom}</span>
+                    <span className="mx-1">|</span>
+                    <br />
+                    <span><strong>Due</strong> {crsAmt?.dueDate}</span>
+                    <span className="mx-1">|</span>
+                    <span>{crsAmt?.points || 100} pts</span>
+                  </div>
                 </div>
-              </div>
-              <div className="d-flex align-items-center">
-                <FaCheckCircle className="text-success me-2" />
-                <IoEllipsisVertical className="fs-4" />
-              </div>
-            </ListGroupItem>))}
-            
-            
+                <AssignmentControlButtons 
+                  assignmentId={crsAmt._id}
+                  deleteAssignment={handleDeleteAssignment}
+                  editAssignment={handleEditAssignment}
+                />
+              </ListGroupItem>
+            ))}
           </ListGroup>
         </ListGroupItem>
       </ListGroup>
