@@ -1,37 +1,88 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import Link from "next/link";
-import { redirect } from "next/dist/client/components/navigation";
+import { useRouter } from "next/navigation"; // Changed import
 import { setCurrentUser } from "../reducer";
 import { useDispatch } from "react-redux";
 import { useState } from "react";
 import * as db from "../../Database";
-import { FormControl, Button } from "react-bootstrap";
+import {
+  FormControl,
+  Button,
+  Col,
+  Container,
+  Form,
+  Row,
+} from "react-bootstrap";
 
 export default function Signin() {
- const [credentials, setCredentials] = useState<any>({});
- const dispatch = useDispatch();
- const signin = () => {
-   const user = db.users.find(
-     (u: any) =>
-       u.username === credentials.username &&
-       u.password === credentials.password
-   );
-   if (!user) return;
-   dispatch(setCurrentUser(user));
-   redirect("/Dashboard");
- };
-  return (
-    <div id="wd-signin-screen">
-      <h1>Sign in</h1>
-      <FormControl defaultValue={credentials.username}
-             onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
-             className="mb-2" placeholder="username" id="wd-username" />
-      <FormControl defaultValue={credentials.password}
-             onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
-             className="mb-2" placeholder="password" type="password" id="wd-password" />
-      <Button onClick={signin} id="wd-signin-btn" className="w-100" > Sign in </Button>
-      <Link id="wd-signup-link" href="Signup"> Sign up </Link>
-    </div>
-);}
+  const [credentials, setCredentials] = useState<any>({});
+  const dispatch = useDispatch();
+  const router = useRouter(); // Use router instead of redirect
 
+  const signin = (e: React.FormEvent) => {
+    e.preventDefault(); // Prevent form submission/page refresh
+
+    const user = db.users.find(
+      (u: any) =>
+        u.username === credentials.username &&
+        u.password === credentials.password
+    );
+
+    if (!user) {
+      alert("Invalid credentials");
+      return;
+    }
+
+    dispatch(setCurrentUser(user));
+    router.push("/Dashboard"); // Use router.push instead of redirect
+  };
+
+  return (
+    <Container>
+      <Row className="justify-content-center mt-5">
+        <Col xs={12} sm={8} md={6} lg={4}>
+          <h1 className="mb-4">Signin</h1>
+          <Form onSubmit={signin}>
+            {" "}
+            {/* Add onSubmit to form */}
+            <Form.Group className="mb-3" controlId="wd-username">
+              <FormControl
+                value={credentials.username || ""} // Changed to value
+                onChange={(e) =>
+                  setCredentials({ ...credentials, username: e.target.value })
+                }
+                placeholder="username"
+              />
+            </Form.Group>
+            <Form.Group className="mb-3" controlId="wd-password">
+              <FormControl
+                value={credentials.password || ""} // Changed to value
+                onChange={(e) =>
+                  setCredentials({ ...credentials, password: e.target.value })
+                }
+                placeholder="password"
+                type="password"
+              />
+            </Form.Group>
+            <Button
+              id="wd-signin-btn"
+              variant="primary"
+              type="submit"
+              className="w-100"
+            >
+              Signin
+            </Button>
+          </Form>
+          <Link
+            id="wd-signup-link"
+            href="/Account/Signup"
+            className="d-block mt-3"
+          >
+            Signup
+          </Link>
+        </Col>
+      </Row>
+    </Container>
+  );
+}

@@ -1,7 +1,7 @@
 "use client" // for interactions like onClick and all on browser by componnt is server/static, to make it browser/ dynamic use this
 
 import React from 'react'
-import store from "../store/page";
+import store from "../store";
 import ClickEvent from './ClickEvent'
 import PassingDataOnEvent from './PassingDataOnEvent'
 import PassingFunctions from './PassingFunctions';
