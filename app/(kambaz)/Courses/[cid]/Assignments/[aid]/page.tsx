@@ -1,3 +1,4 @@
+// Assignment Editor Page 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 import { Form, Button, Row, Col, Card, FormGroup } from "react-bootstrap";
@@ -5,6 +6,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
 import { useState } from "react";
 import { addAssignment, updateAssignment } from "../reducer";
+import { v4 as uuidv4 } from "uuid";
 
 export default function AssignmentEditor() {
   const { cid, aid } = useParams();
@@ -29,11 +31,11 @@ export default function AssignmentEditor() {
   
   // Initialize form state
   const [assignment, setAssignment] = useState({
-    _id: isNew ? "" : existingAssignment?._id || "",
+    _id: isNew ? uuidv4() : existingAssignment?._id || "",
     title: existingAssignment?.title || "New Assignment",
     course: cid as string,
     description: existingAssignment?.description || "Assignment Description",
-    points: existingAssignment?.points ,
+    points: existingAssignment?.points || 100,
     group: existingAssignment?.group || "ASSIGNMENTS",
     displayGradeAs: existingAssignment?.displayGradeAs || "Percentage",
     submissionType: existingAssignment?.submissionType || "Online",
@@ -52,7 +54,6 @@ export default function AssignmentEditor() {
       // Add new assignment
       dispatch(addAssignment({
         ...assignment,
-        title: assignment.title,
         dueDate: assignment.editorDueDate ? `${assignment.editorDueDate} at 11:59pm` : "",
         availableFrom: assignment.editorAvailableFrom ? `${assignment.editorAvailableFrom} at 12:00am` : "",
         availableUntil: assignment.editorAvailableUntil ? `${assignment.editorAvailableUntil} at 11:59pm` : "",
@@ -78,7 +79,7 @@ export default function AssignmentEditor() {
             <Form.Control
               type="text"
               id="wd-name"
-              value={assignment._id}
+              value={assignment.title}
               onChange={(e) => setAssignment({ ...assignment, title: e.target.value })}
               size="lg"
               disabled={!isEditMode}
