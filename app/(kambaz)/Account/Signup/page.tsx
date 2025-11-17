@@ -1,7 +1,10 @@
-"use client";
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client"; 
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { setCurrentUser } from "../reducer";
+import { useDispatch } from "react-redux";
+import { useState } from "react";
 import {
   Container,
   Row,
@@ -10,12 +13,19 @@ import {
   Button,
   FormControl,
 } from "react-bootstrap";
+import * as client from "../client";
 
 export default function Signup() {
-  // Function to handle form submission
-  const handleSignup = (event: React.FormEvent) => {
-    event.preventDefault();
-    redirect("/Account/Profile");
+  const router = useRouter();
+  const [user, setUser] = useState<any>({});
+  const dispatch = useDispatch();
+
+
+  const handleSignup = async (event: React.FormEvent) => {
+    event.preventDefault(); 
+    const currentUser = await client.signup(user);
+    dispatch(setCurrentUser(currentUser));
+    router.push("/Account/Profile");
   };
 
   return (
@@ -25,14 +35,19 @@ export default function Signup() {
           <h1 className="mb-4">Signup</h1>
           <Form onSubmit={handleSignup}>
             <Form.Group className="mb-3" controlId="wd-username">
-              <FormControl placeholder="username" defaultValue={"john"} />
+              <FormControl
+                placeholder="username"
+                value={user.username}
+                onChange={(e) => setUser({ ...user, username: e.target.value })}
+              />
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="wd-password">
               <FormControl
                 placeholder="password"
                 type="password"
-                defaultValue={"password"}
+                value={user.password}
+                onChange={(e) => setUser({ ...user, password: e.target.value })}
               />
             </Form.Group>
 

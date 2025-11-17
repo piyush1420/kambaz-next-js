@@ -1,18 +1,21 @@
+/* eslint-disable @next/next/no-assign-module-variable */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react/jsx-key */
+// app/(kambaz)/Courses/[cid]/Modules/page.tsx
 "use client"
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { FormControl, ListGroup, ListGroupItem } from "react-bootstrap";
 import { BsGripVertical } from "react-icons/bs";
 import ModulesControls from "./ModulesControls";
 import ModuleControlButtons from "./ModuleControlButtons";
 import LessonControlButtons from "./LessonControlButtons";
-import * as db from "../../../Database";
+import * as client from "../../client";
 
 // redux imports
 import { useSelector, useDispatch } from "react-redux";
 import {
+  setModules,
   addModule as addModuleAction,
   deleteModule as deleteModuleAction,
   editModule as editModuleAction,
@@ -26,25 +29,66 @@ export default function Modules() {
   const [moduleName, setModuleName] = useState("");
 
   // retrieve modules from redux store instead of local state
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const modules = useSelector((state: any) => state.modulesReducer.modules);
+  const { modules } = useSelector((state: any) => state.modulesReducer);
   const dispatch = useDispatch();
 
-  // dispatch addModule reducer and clear local moduleName
-  const addModule = () => {
-    dispatch(addModuleAction({ name: moduleName, course: cid }));
-    setModuleName("");
+  // Fetch modules from server
+  const fetchModules = async () => {
+    const modules = await client.findModulesForCourse(cid as string);
+    dispatch(setModules(modules));
+  };
+
+  useEffect(() => {
+    fetchModules();
+  }, []);
+
+  // Create module on server and update Redux store
+  const onCreateModuleForCourse = async () => {
+    if (!cid) return;
+    try {
+      const newModule = { name: moduleName, course: cid };
+      const module = await client.createModuleForCourse(cid as string, newModule);
+      dispatch(setModules([...modules, module]));
+      setModuleName(""); // Clear the input field after successful creation
+    } catch (error) {
+      console.error("Error creating module:", error);
+    }
+  };
+
+  // Delete module on server and update Redux store
+  const onRemoveModule = async (moduleId: string) => {
+    try {
+      await client.deleteModule(moduleId);
+      dispatch(setModules(modules.filter((m: any) => m._id !== moduleId)));
+    } catch (error) {
+      console.error("Error deleting module:", error);
+    }
+  };
+
+  // Update module on server and update Redux store
+  const onUpdateModule = async (module: any) => {
+    try {
+      const updatedModule = await client.updateModule(module);
+      dispatch(setModules(modules.map((m: any) => 
+        m._id === module._id ? updatedModule : m
+      )));
+    } catch (error) {
+      console.error("Error updating module:", error);
+    }
   };
 
   // remove local delete/edit/update mutators — use dispatch directly below
   return (
     <div>
-      <ModulesControls setModuleName={setModuleName} moduleName={moduleName} addModule={addModule} />
+      <ModulesControls 
+        setModuleName={setModuleName} 
+        moduleName={moduleName} 
+        addModule={onCreateModuleForCourse} 
+      />
       <br /><br /><br /><br />
       
       <ListGroup id="wd-modules" className="rounded-0">
         {modules
-          .filter((module: any) => module.course === cid)
           .map((module: any) => (
             // eslint-disable-next-line react/jsx-key
             <ListGroupItem className="wd-module p-0 mb-5 fs-5 border-gray">
@@ -55,12 +99,12 @@ export default function Modules() {
                onChange={(e) => dispatch(updateModuleAction({ ...module, name: e.target.value }))}
                onKeyDown={(e) => {
                  if (e.key === "Enter") {
-                   dispatch(updateModuleAction({ ...module, editing: false }));
+                   onUpdateModule({ ...module, editing: false });
                  }
                }}
                defaultValue={module.name}/>
       )} <ModuleControlButtons moduleId={module._id}
-        deleteModule={(moduleId: string) => dispatch(deleteModuleAction(moduleId))}
+        deleteModule={(moduleId: string) => onRemoveModule(moduleId)}
         editModule={(moduleId: string) => dispatch(editModuleAction(moduleId))}/>
               </div>
               {module.lessons && (
@@ -68,6 +112,7 @@ export default function Modules() {
                   {module.lessons.map((lesson: any) => (
                     <ListGroupItem className="wd-lesson p-3 ps-1">
                       <BsGripVertical className="me-2 fs-3" /> {lesson.name} <LessonControlButtons />
+                      
                     </ListGroupItem>
                   ))}
                 </ListGroup>
@@ -78,4 +123,3 @@ export default function Modules() {
     </div>
   );
 }
-

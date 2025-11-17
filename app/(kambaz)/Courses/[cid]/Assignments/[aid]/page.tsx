@@ -3,8 +3,9 @@
 import { Form, Button, Row, Col, Card, FormGroup } from "react-bootstrap";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
-import { useState } from "react";
-import { addAssignment, updateAssignment } from "../reducer";
+import { useState, useEffect } from "react";
+import { setAssignments } from "../reducer";
+import * as client from "../../../client";
 
 export default function AssignmentEditor() {
   const { cid, aid } = useParams();
@@ -33,7 +34,7 @@ export default function AssignmentEditor() {
     title: existingAssignment?.title || "New Assignment",
     course: cid as string,
     description: existingAssignment?.description || "Assignment Description",
-    points: existingAssignment?.points ,
+    points: existingAssignment?.points || 100,
     group: existingAssignment?.group || "ASSIGNMENTS",
     displayGradeAs: existingAssignment?.displayGradeAs || "Percentage",
     submissionType: existingAssignment?.submissionType || "Online",
@@ -46,27 +47,61 @@ export default function AssignmentEditor() {
     editorAvailableUntil: existingAssignment?.editorAvailableUntil || "",
   });
 
-  // Handle save
-  const handleSave = () => {
-    if (isNew) {
-      // Add new assignment
-      dispatch(addAssignment({
+  // Fetch assignments from server on mount
+  const fetchAssignments = async () => {
+    try {
+      const fetchedAssignments = await client.findAssignmentsForCourse(cid as string);
+      dispatch(setAssignments(fetchedAssignments));
+      
+      // If editing, update the assignment state with fetched data
+      if (!isNew) {
+        const fetchedAssignment = fetchedAssignments.find((a: any) => a._id === aid);
+        if (fetchedAssignment) {
+          setAssignment({
+            ...fetchedAssignment,
+            editorDueDate: fetchedAssignment.editorDueDate || "",
+            editorAvailableFrom: fetchedAssignment.editorAvailableFrom || "",
+            editorAvailableUntil: fetchedAssignment.editorAvailableUntil || "",
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching assignments:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchAssignments();
+  }, [cid]);
+
+  // Handle save - integrate with backend
+  const handleSave = async () => {
+    try {
+      const assignmentData = {
         ...assignment,
         title: assignment.title,
         dueDate: assignment.editorDueDate ? `${assignment.editorDueDate} at 11:59pm` : "",
         availableFrom: assignment.editorAvailableFrom ? `${assignment.editorAvailableFrom} at 12:00am` : "",
         availableUntil: assignment.editorAvailableUntil ? `${assignment.editorAvailableUntil} at 11:59pm` : "",
-      }));
-    } else {
-      // Update existing assignment
-      dispatch(updateAssignment({
-        ...assignment,
-        dueDate: assignment.editorDueDate ? `${assignment.editorDueDate} at 11:59pm` : "",
-        availableFrom: assignment.editorAvailableFrom ? `${assignment.editorAvailableFrom} at 12:00am` : "",
-        availableUntil: assignment.editorAvailableUntil ? `${assignment.editorAvailableUntil} at 11:59pm` : "",
-      }));
+      };
+
+      if (isNew) {
+        // Create new assignment on server
+        const newAssignment = await client.createAssignmentForCourse(cid as string, assignmentData);
+        dispatch(setAssignments([...assignments, newAssignment]));
+      } else {
+        // Update existing assignment on server
+        const updatedAssignment = await client.updateAssignment(assignmentData);
+        dispatch(setAssignments(assignments.map((a: any) => 
+          a._id === updatedAssignment._id ? updatedAssignment : a
+        )));
+      }
+      
+      router.push(`/Courses/${cid}/Assignments`);
+    } catch (error) {
+      console.error("Error saving assignment:", error);
+      alert("Failed to save assignment. Please try again.");
     }
-    router.push(`/Courses/${cid}/Assignments`);
   };
 
   return (
@@ -78,7 +113,7 @@ export default function AssignmentEditor() {
             <Form.Control
               type="text"
               id="wd-name"
-              value={assignment._id}
+              value={assignment.title}
               onChange={(e) => setAssignment({ ...assignment, title: e.target.value })}
               size="lg"
               disabled={!isEditMode}
@@ -111,7 +146,7 @@ export default function AssignmentEditor() {
             type="number"
             id="wd-points"
             value={assignment.points}
-            onChange={(e) => setAssignment({ ...assignment, points: parseInt(e.target.value) })}
+            onChange={(e) => setAssignment({ ...assignment, points: parseInt(e.target.value) || 0 })}
             disabled={!isEditMode}
           />
         </Col>

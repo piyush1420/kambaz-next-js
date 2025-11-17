@@ -1,33 +1,87 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createSlice } from "@reduxjs/toolkit";
-import { courses } from "../Database";
+import { courses, enrollments } from "../Database";
 import { v4 as uuidv4 } from "uuid";
-const initialState = {
- courses: courses,
+
+const getInitialEnrollments = () => {
+  // Check if we're on the client side
+  if (typeof window !== 'undefined') {
+    const storedEnrollments = sessionStorage.getItem('enrollments');
+    return storedEnrollments ? JSON.parse(storedEnrollments) : enrollments;
+  }
+  // Return default enrollments on server side
+  return enrollments;
 };
+
+const initialState = {
+  courses: courses,
+  enrollments: getInitialEnrollments(),
+};
+
 const coursesSlice = createSlice({
- name: "courses",
- initialState,
- reducers: {
-   addNewCourse: (state, { payload: course }) => {
-     const newCourse = { ...course, _id: uuidv4() };
-     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-     state.courses = [...state.courses, newCourse] as any;
-   },
-   deleteCourse: (state, { payload: courseId }) => {
-     state.courses = state.courses.filter(
-       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-       (course: any) => course._id !== courseId
-     );
-   },
-   updateCourse: (state, { payload: course }) => {
-     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-     state.courses = state.courses.map((c: any) =>
-       c._id === course._id ? course : c
-     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-     ) as any;
-   },
- },
+  name: "courses",
+  initialState,
+  reducers: {
+    setCourses: (state, action) => {
+      state.courses = action.payload;
+    },
+    addCourse: (state, { payload: Course }) => {
+      // Use the course as-is from the server (it already has the correct _id)
+      const newCourse: any = {
+        _id: Course._id || uuidv4(), // Use server ID if available, otherwise generate
+        name: Course.name,
+        number: Course.number,
+        startDate: Course.startDate,
+        endDate: Course.endDate,
+        department: Course.department,
+        credits: Course.credits,
+        description: Course.description,
+        image: Course.image, // Include the image property
+      };
+      state.courses = [...state.courses, newCourse] as any;
+    },
+    deleteCourse: (state, { payload: CourseId }) => {
+      state.courses = state.courses.filter(
+        (c: any) => c._id !== CourseId);
+    },
+    updateCourse: (state, { payload: { course } }) => {
+      state.courses = state.courses.map((c) => {
+        if (c._id === course._id) {
+          return course;
+        } else {
+          return c;
+        }
+      })
+    },
+    editCourse: (state, { payload: CourseId }) => {
+      state.courses = state.courses.map((c: any) =>
+        c._id === CourseId ? { ...c, editing: true } : c
+      ) as any;
+    },
+    enroll: (state, { payload: { user, course } }) => {
+      const newEnrollment = {
+        _id: uuidv4(),
+        user: user._id,
+        course: course._id
+      };
+      state.enrollments = [...state.enrollments, newEnrollment];
+      // Check if we're on the client side before using sessionStorage
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('enrollments', JSON.stringify(state.enrollments));
+      }
+    },
+    unenroll: (state, { payload: { user, course } }) => {
+      state.enrollments = state.enrollments.filter((e: { user: any; course: any }) =>
+        !(e.course === course._id && e.user === user._id)
+      );
+      // Check if we're on the client side before using sessionStorage
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('enrollments', JSON.stringify(state.enrollments));
+      }
+      console.log("After unenroll:", JSON.stringify(state.enrollments, null, 2));
+    },
+  },
 });
-export const { addNewCourse, deleteCourse, updateCourse } =
- coursesSlice.actions;
+
+export const { addCourse, deleteCourse, updateCourse, editCourse, enroll, unenroll, setCourses } = coursesSlice.actions;
 export default coursesSlice.reducer;
