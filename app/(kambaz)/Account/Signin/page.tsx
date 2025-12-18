@@ -14,10 +14,12 @@ import {
   Container,
   Form,
   Row,
+  Alert,
 } from "react-bootstrap";
 
 export default function Signin() {
   const [credentials, setCredentials] = useState<any>({});
+  const [showDemo, setShowDemo] = useState(true);
   const dispatch = useDispatch();
   const router = useRouter(); 
   const signin = async (e: React.FormEvent) => {
@@ -37,6 +39,15 @@ export default function Signin() {
     <Container>
       <Row className="justify-content-center mt-5">
         <Col xs={12} sm={8} md={6} lg={4}>
+          {showDemo && (
+            <Alert variant="info" dismissible onClose={() => setShowDemo(false)}>
+              <Alert.Heading>Demo Credentials</Alert.Heading>
+              <hr />
+              <p className="mb-1"><strong>STUDENT:</strong> captain_america / shield123</p>
+              <p className="mb-1"><strong>FACULTY:</strong> iron_man / stark123</p>
+              <p className="mb-0"><strong>ADMIN:</strong> ada / 123</p>
+            </Alert>
+          )}
           <h1 className="mb-4">Signin</h1>
           <Form onSubmit={signin}>
             {" "}
