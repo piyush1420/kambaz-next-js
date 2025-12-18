@@ -17,7 +17,7 @@ import ReduxExamples from './ReduxExamples';
 
 
 import { Provider } from "react-redux";
-import HelloRedux from './ReduxExamples/HelloRedux';
+// import HelloRedux from './ReduxExamples/HelloRedux';
 
 export default function Lab4() {
     //subfunction

@@ -1,6 +1,6 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 export default function HelloRedux() {
   const { message } = useSelector((state: any) => state.helloReducer);//From the global Redux state, give me the part called helloReducer
   return (
